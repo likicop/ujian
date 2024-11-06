@@ -1,39 +1,21 @@
-name: Push to Repository
+name: CI Pipeline
 
-on:
-  push:
-    branches:
-      - main  # Atau 'master' sesuai dengan branch yang Anda gunakan
+on: [push, pull_request]
 
 jobs:
-  push_changes:
-    runs-on: ubuntu-latest
-    
+  build:
+    runs-on: self-hosted
     steps:
-    # Checkout repositori
-    - name: Checkout repository
-      uses: actions/checkout@v3  # Menggunakan versi terbaru actions/checkout
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    # Set up Git
-    - name: Set up Git
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
 
-    # Pastikan Anda menarik perubahan terbaru dari remote sebelum commit
-    - name: Pull latest changes from origin
-      run: |
-        git pull origin main  # Atau 'master' sesuai branch yang digunakan
+      - name: Install dependencies
+        run: npm install
 
-    # Menambahkan perubahan dan melakukan commit
-    - name: Commit changes
-      run: |
-        git add .
-        git commit -m "Automatic commit from GitHub Actions" || echo "No changes to commit"
-
-    # Push perubahan ke remote update
-    - name: Push changes
-      run: |
-        git push origin main  # Atau 'master' sesuai branch yang digunakan
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run tests
+        run: npm test
